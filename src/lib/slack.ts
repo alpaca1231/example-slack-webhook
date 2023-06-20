@@ -18,7 +18,7 @@ export const notificationErrorToSlack = async (error: Error) => {
 
   const body = {
     message: error.message,
-    time: now.toDateString(),
+    time: now.toString(),
   };
 
   // lastNotificationDateが24時間以上前の場合、Slackに通知する
