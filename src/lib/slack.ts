@@ -12,21 +12,27 @@ export const notificationErrorToSlack = async (error: Error) => {
 
   // 24時間前の日時を取得する
   const now = new Date();
-  // const previous = new Date(now.setDate(now.getDate() - 1));
-  const previous = new Date(now.setMinutes(now.getMinutes() - 1)); // 1分前
+  const previous = new Date();
+  // previous.setDate(now.getDate() - 1); // 24時間前
+  previous.setMinutes(now.getMinutes() - 2); // 2分前
 
-  // 24時間前の日時がKVに保存されている日時よりも新しい場合はSlackに通知する
-  if (lastNotificationDate ?? now < previous) {
-    await axios.post(
-      SLACK_WEBHOOK_URL,
-      {
-        message: error.message,
-        time: (lastNotificationDate ?? now).toDateString(),
-      },
-      { headers: { "Content-Type": "application/json" } }
-    );
+  const body = {
+    message: error.message,
+    time: now.toDateString(),
+  };
+
+  // lastNotificationDateが24時間以上前の場合、Slackに通知する
+  if (!lastNotificationDate || lastNotificationDate < previous) {
+    console.log(`
+      lastNotificationDate: ${lastNotificationDate}
+      now: ${now}
+      previous: ${previous}
+    `);
+    await axios.post(SLACK_WEBHOOK_URL, body, { headers: { "Content-Type": "application/json" } });
 
     // KVにSlackの通知の最終更新日時を保存する
     await kv.set("lastNotificationDate", now);
+
+    return body;
   }
 };

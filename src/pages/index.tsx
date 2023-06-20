@@ -7,8 +7,9 @@ import { notificationErrorToSlack } from "@/lib/slack";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const getStaticProps = async () => {
+export const getServerSideProps = async () => {
   try {
+    // 毎回500エラーになる
     const { data } = await axios.get("https://httpstat.us/500");
     return {
       props: {
@@ -16,16 +17,20 @@ export const getStaticProps = async () => {
       },
     };
   } catch (error) {
-    await notificationErrorToSlack(error as Error);
+    const data = await notificationErrorToSlack(error as Error);
     return {
       props: {
-        data: null,
+        data: data || {},
       },
     };
   }
 };
 
-export default function Home() {
+type Props = {
+  data: any;
+};
+
+export default function Home({ data }: Props) {
   return (
     <>
       <Head>
@@ -59,6 +64,9 @@ export default function Home() {
           </div>
         </div>
 
+        {data.message}
+        <br />
+        {data.time}
         <div className={styles.center}>
           <Image
             className={styles.logo}
