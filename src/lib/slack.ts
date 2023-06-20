@@ -23,11 +23,6 @@ export const notificationErrorToSlack = async (error: Error) => {
 
   // lastNotificationDateが24時間以上前の場合、Slackに通知する
   if (!lastNotificationDate || lastNotificationDate < previous) {
-    console.log(`
-      lastNotificationDate: ${lastNotificationDate}
-      now: ${now}
-      previous: ${previous}
-    `);
     await axios.post(SLACK_WEBHOOK_URL, body, { headers: { "Content-Type": "application/json" } });
 
     // KVにSlackの通知の最終更新日時を保存する
